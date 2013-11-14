@@ -10,7 +10,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SBParser {
@@ -36,6 +38,13 @@ public class SBParser {
         nodelistCounter = 0;
     }
 
+    public int getSize() {
+        if (nodelist == null) {
+            throw new IllegalArgumentException("Nothing has been parsed yet.");
+        }
+        return nodelist.getLength();
+    }
+
     private int nodelistCounter = 0;
 
     public Map<String, String> getNextArticle() {
@@ -55,6 +64,27 @@ public class SBParser {
             nodelistCounter++;
         }
         return map;
+    }
+
+    public List<Map<String, String>> getAllArticles() {
+        if (nodelist == null) {
+            throw new IllegalArgumentException("Nothing has been parsed yet.");
+        }
+        List<Map<String, String>> list = new ArrayList<>();
+
+        for (int i = 0; i < nodelist.getLength(); i++) {
+            Map<String, String> map = new HashMap<>();
+            Node node = nodelist.item(i);
+            NodeList children = node.getChildNodes();
+            for (int j = 0; j < children.getLength(); j++) {
+                String content = children.item(j).getTextContent();
+                content = content.replaceAll("'", "");
+                map.put(children.item(j).getNodeName(), content);
+            }
+            list.add(map);
+        }
+
+        return list;
     }
 
     public void search(String searchString) {

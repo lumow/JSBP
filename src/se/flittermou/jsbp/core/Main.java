@@ -39,14 +39,15 @@ public class Main {
     }
 
     public static void fullUpdate() {
-        Webapi.update();
+        Webapi webapi = new Webapi();
+        webapi.update();
         DB db = new DB();
         SBParser parser = new SBParser();
         ArticleTable at = null;
 
         try {
             db.connect();
-            parser.parse(Webapi.getFile());
+            parser.parse(webapi.getFile());
             at = new ArticleTable(db);
             at.delete();
             at.create();

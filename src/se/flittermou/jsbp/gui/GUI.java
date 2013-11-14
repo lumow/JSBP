@@ -14,15 +14,16 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class GUI extends JFrame {
+    private DB db = new DB();
     private final String TITLE = "Systembolaget desktop app";
     private final String URL = "http://systembolaget.se/";
     private final Dimension SIZE = new Dimension(700, 500);
-    private JPanel mainPanel = new JPanel();
-    private TextField searchField = new TextField();
-    private JButton searchButton = new JButton("Sök");
-    private DB db = new DB();
-    private JTable table = new JTable(new ArticleTableModel(db));
-    private JScrollPane scrollpane = new JScrollPane(table);
+    private final JPanel mainPanel = new JPanel();
+    private final TextField searchField = new TextField();
+    private final JButton searchButton = new JButton("Sök");
+    private final JButton updateButton = new JButton("Uppdatera databasen");
+    private final JTable table = new JTable(new ArticleTableModel(db));
+    private final JScrollPane scrollpane = new JScrollPane(table);
 
     public GUI() {
         table.addMouseListener(new MouseAdapter() {
@@ -45,6 +46,12 @@ public class GUI extends JFrame {
         setSize(SIZE);
         GridBagConstraints c = new GridBagConstraints();
         mainPanel.setLayout(new GridBagLayout());
+        updateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateDatabase();
+            }
+        });
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -60,14 +67,20 @@ public class GUI extends JFrame {
             }
         });
         c.fill = GridBagConstraints.HORIZONTAL;
-        c.weightx = 0.9;
+        c.weightx = 0.1;
         c.weighty = 0.1;
         c.gridx = 0;
+        c.gridy = 0;
+        mainPanel.add(updateButton, c);
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0.9;
+        c.weighty = 0.1;
+        c.gridx = 1;
         c.gridy = 0;
         mainPanel.add(searchField, c);
         c.weightx = 0.1;
         c.weighty = 0;
-        c.gridx = 1;
+        c.gridx = 2;
         mainPanel.add(searchButton, c);
         table.setFillsViewportHeight(true);
         c.weightx = 0;
@@ -75,7 +88,7 @@ public class GUI extends JFrame {
         c.fill = GridBagConstraints.BOTH;
         c.gridx = 0;
         c.gridy = 1;
-        c.gridwidth = 2;
+        c.gridwidth = 3;
         mainPanel.add(scrollpane, c);
         mainPanel.setOpaque(true);
         add(mainPanel);
@@ -108,5 +121,21 @@ public class GUI extends JFrame {
         } catch (IOException | URISyntaxException e1) {
             e1.printStackTrace();
         }
+    }
+
+    private void updateDatabase() {
+        final Popup popup = new Popup(db);
+        //       popup.setModal(true);
+//        popup.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+        popup.setVisible(true);
+        popup.updateDB();
+    }
+
+    private static String prettyPrintTime(long time) {
+        int seconds = (int) (time / 1000);
+        int hours = seconds > 3600 ? seconds / 3600 : 0;
+        int minutes = seconds > 60 ? seconds / 60 : 0;
+        int rest = seconds % 60;
+        return hours + " hours, " + minutes + " minutes, " + rest + " seconds";
     }
 }

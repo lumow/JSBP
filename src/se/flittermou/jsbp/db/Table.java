@@ -47,7 +47,7 @@ public class Table {
             throw new SQLException("Not connected to database");
         }
         Statement statement = c.createStatement();
-        String sql = "drop table " + table_name;
+        String sql = "drop table if exists " + table_name;
         statement.executeUpdate(sql);
         statement.close();
     }
@@ -67,13 +67,53 @@ public class Table {
         return null;
     }
 
+    /**
+     * All insert statements must have the same columns to be inserted.
+     *
+     * @param valueList List of maps with columns as keys and insert values as values.
+     * @throws SQLException
+     */
+    public void insertAll(List<Map<String, String>> valueList) throws SQLException {
+        if (valueList.isEmpty()) {
+            return;
+        }
+
+        Connection conn = db.getConnection();
+        conn.setAutoCommit(false);
+        Statement statement = conn.createStatement();
+        StringBuilder sb = new StringBuilder();
+        Set<String> keys = valueList.get(0).keySet();
+
+        sb.append("insert into ").append(table_name).append("(");
+        for (String key : keys) {
+            sb.append(key).append(", ");
+        }
+        sb.deleteCharAt(sb.lastIndexOf(","));
+        sb.append(") values ");
+
+        for (Map<String, String> map : valueList) {
+            sb.append("(");
+            for (String value : map.values()) {
+                sb.append("'").append(value).append("', ");
+            }
+            sb.deleteCharAt(sb.lastIndexOf(","));
+            sb.append("), ");
+        }
+        sb.deleteCharAt(sb.lastIndexOf(","));
+
+        statement.executeUpdate(sb.toString());
+        statement.close();
+        conn.commit();
+        conn.setAutoCommit(true);
+    }
+
     public void insert(Map<String, String> valuesMap) throws SQLException {
         if (valuesMap.isEmpty()) {
             return;
         }
 
         Connection conn = db.getConnection();
-        conn.setAutoCommit(false);
+        //conn.setAutoCommit(false);
         Statement statement = conn.createStatement();
 
         StringBuilder sb = new StringBuilder();
@@ -95,8 +135,8 @@ public class Table {
 
         statement.executeUpdate(sb.toString());
         statement.close();
-        conn.commit();
-        conn.setAutoCommit(true);
+        //conn.commit();
+        //conn.setAutoCommit(true);
     }
 
     public List<Row> select(List<String> columns, String whereClause) throws SQLException {
