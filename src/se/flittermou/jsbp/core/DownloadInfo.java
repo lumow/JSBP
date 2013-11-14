@@ -10,7 +10,7 @@ public class DownloadInfo {
     }
 
     /**
-     * @return Current download speed in kiloBytes / seconds.
+     * @return Average download speed in kiloBytes / seconds.
      */
     public double getDownloadSpeed() {
         long seconds = time / 1000;
